@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title></title>
+    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2021.3.1109/styles/kendo.common.min.css" />
+    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2021.3.1109/styles/kendo.default.min.css" />
+    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2021.3.1109/styles/kendo.default.mobile.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2021.3.1109/styles/kendo.default-main.min.css" />
+    <script src="https://kendo.cdn.telerik.com/2021.3.1109/js/kendo.all.min.js"></script>
+</head>
+
+<body>
+    <div id="example">
+        <div id="grid"></div>
+        <script>
+            $(document).ready(function () {
+                var crudServiceBaseUrl = "https://localhost:44393/api/Parsel/",
+                    dataSource = new kendo.data.DataSource({
+                        transport: {
+                            read: {
+                                url: crudServiceBaseUrl + "all",
+                                type: "get",
+                                dataType: "json"
+                            },
+                            update: {
+                                url: crudServiceBaseUrl + "update",
+                                type: "post",
+                                dataType: "json",
+                                contentType: "application/json; charset=utf-8"
+                            },
+                            destroy: {
+                                url: function(e) {
+                                    return crudServiceBaseUrl + "delete/" + e.models[0].parselId;
+                                }, //crudServiceBaseUrl + "delete/",
+                                type: "delete"
+                            },
+                            parameterMap: function (options, operation) {
+                                if (operation == "update" || operation == "create" && options.models) {
+                                    return  JSON.stringify({
+                                        parselId: options.models[0].parselId,
+                                        parselIl:options.models[0].parselIl,
+                                        parselIlce: options.models[0].parselIlce,
+                                        wktString:  options.models[0].wktString,
+                                        pareselMahalle: options.models[0].pareselMahalle});
+                                } else if ( operation  == "destroy" && options.models){
+                                    return options.models[0].parselId
+                                }
+                            }
+                        },
+                        batch: true,
+                        pageSize: 20,
+                        schema: {
+                            model: {
+                                id: "parselId",
+                                fields: {
+                                    pareselMahalle: { editable: true, nullable: true },
+                                    parselIl: { editable: true, nullable: true},
+                                    parselIlce: {editable: true, nullable: true }
+                                }
+                            }
+                        }
+                    });
+
+                $("#grid").kendoGrid({
+                    dataSource: dataSource,
+                    pageable: true,
+                    height: 550,
+                    columns: [
+                        { field: "parselIl", title: "parselIl" },
+                        { field: "parselIlce", title: "parselIlce", format: "{0:c}", width: "120px" },
+                        { command: ["edit", "destroy"], title: "&nbsp;", width: "250px" }],
+                    editable: "popup"
+                });
+            });
+            function customBoolEditor(container, options) {
+                $('<input class="k-checkbox" type="checkbox" name="Discontinued" data-type="boolean" data-bind="checked:Discontinued">').appendTo(container);
+            }
+        </script>
+    </div>
+
+
+
+
+</body>
+
+</html>
